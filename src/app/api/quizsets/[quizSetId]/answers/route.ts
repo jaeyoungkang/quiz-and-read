@@ -6,12 +6,6 @@ import { User, AuthError } from '@supabase/supabase-js'; // Import AuthError
 // Again, using generated Supabase types is highly recommended.
 // import { Database } from '@/types/supabase';
 
-interface ApiContext {
-  params: {
-    quizSetId: string;
-  };
-}
-
 interface SubmittedAnswerPayload {
     quizId: string;
     submittedAnswer: string;
@@ -43,8 +37,8 @@ interface UserAnswerInsert {
 }
 
 
-export async function POST(request: NextRequest, context: ApiContext) {
-  const quizSetId = context.params.quizSetId;
+export async function POST(request: NextRequest, { params }: { params: { quizSetId: string } }) {
+  const quizSetId = params.quizSetId;
 
   // Apply the same fix: await createClient() if it's async
   const supabase = await createClient(); // <-- Added await
