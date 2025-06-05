@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Supabase JWT 토큰 얻기 테스트</title>
+    <!-- Supabase Client Library (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        input { margin-bottom: 10px; padding: 8px; width: 250px; }
+        button { padding: 10px 15px; }
+        pre { background-color: #f0f0f0; padding: 10px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+    <h1>Supabase JWT 토큰 얻기</h1>
+
+    <div>
+        <label for="supabaseUrl">Supabase URL:</label><br>
+        <input type="text" id="supabaseUrl" placeholder="https://your-project-ref.supabase.co" value=""><br>
+
+        <label for="supabaseAnonKey">Supabase Anon Key:</label><br>
+        <input type="text" id="supabaseAnonKey" placeholder="your-anon-key" value=""><br>
+
+        <label for="email">테스트 사용자 이메일:</label><br>
+        <input type="email" id="email" placeholder="test@example.com" value=""><br>
+
+        <label for="password">테스트 사용자 비밀번호:</label><br>
+        <input type="password" id="password" value=""><br>
+
+        <button onclick="loginAndGetToken()">로그인 및 토큰 가져오기</button>
+    </div>
+
+    <h2>결과:</h2>
+    <pre id="result">여기에 JWT 토큰이 표시됩니다.</pre>
+
+    <script>
+        let supabase = null;
+
+        async function loginAndGetToken() {
+            const supabaseUrl = document.getElementById('supabaseUrl').value;
+            const supabaseAnonKey = document.getElementById('supabaseAnonKey').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+
+            if (!supabaseUrl || !supabaseAnonKey) {
+                resultDiv.textContent = "Supabase URL과 Anon Key를 입력해주세요.";
+                return;
+            }
+
+            // Supabase 클라이언트 초기화 (이미 초기화되지 않은 경우에만)
+            // 실제 앱에서는 한 번만 초기화합니다.
+            supabase = supabase || window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+
+            resultDiv.textContent = "로그인 시도 중...";
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password,
+                });
+
+                if (error) {
+                    console.error("로그인 오류:", error);
+                    resultDiv.textContent = `로그인 실패: ${error.message}`;
+                    return;
+                }
+
+                if (data && data.session) {
+                    console.log("로그인 성공! 세션 정보:", data.session);
+                    const jwtToken = data.session.access_token;
+                    resultDiv.textContent = `로그인 성공!\n\nYOUR_SUPABASE_JWT_TOKEN:\n${jwtToken}`;
+                    console.log("JWT Token:", jwtToken);
+                    // 이 토큰을 복사하여 Postman 등의 Authorization 헤더에 사용하세요.
+                    // Bearer <여기에_복사한_토큰_붙여넣기>
+                } else {
+                    resultDiv.textContent = "로그인 성공했으나 세션 정보를 가져올 수 없습니다.";
+                }
+
+            } catch (e) {
+                console.error("예외 발생:", e);
+                resultDiv.textContent = `오류 발생: ${e.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+curl -X POST http://localhost:3000/api/quiz/generate \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6IkMwRVZFUzdOYldxeUV3WTYiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3p3bGt4cHV2b3Vua2NubGdzanJyLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiIwMzIyOTBlZi05NWUyLTQ5YmUtOTc0Yy1iZjJhMzU4ZmViZGMiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzQ4ODQ0OTUyLCJpYXQiOjE3NDg4NDEzNTIsImVtYWlsIjoiakB5b3VuZ2NvbXBhbnkua3IiLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsIjoiakB5b3VuZ2NvbXBhbnkua3IiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGhvbmVfdmVyaWZpZWQiOmZhbHNlLCJzdWIiOiIwMzIyOTBlZi05NWUyLTQ5YmUtOTc0Yy1iZjJhMzU4ZmViZGMifSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTc0ODg0MTM1Mn1dLCJzZXNzaW9uX2lkIjoiNDY3NzM2OGItMmY1NS00Mzg0LWE4NjItY2RkNjkyMDU1ZWE4IiwiaXNfYW5vbnltb3VzIjpmYWxzZX0.bfJgeSLE-sfm_eWt74nnZgmiQPk7sWQS2LeHV7JDkI0" \
+-d '{
+    "count": 3,
+    "text": "**They left the woods and started up the road toward their house.** As they walked past all the houses on their street, **the trip to dinosaur time *did* seem more and more like a dream.** **Only *this* world and *this* time seemed real.** Jack reached into his pocket. **He clasped the gold medallion.** He felt the engraving of the letter M. It made Jack’s fingers tingle. Jack laughed. Suddenly he felt very happy. **He couldn’t explain what had happened today.**  **But he knew for sure that their trip in the magic tree house had been real.** Absolutely real."
+}'
