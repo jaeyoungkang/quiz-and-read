@@ -4,10 +4,11 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server'; // 서버용 Supabase 클라이언트
 import Link from 'next/link'; // 페이지 이동을 위한 Link 컴포넌트
 import { Button } from '@/components/ui/button'; // shadcn/ui 버튼 (예시)
+import { UserStatusDisplay } from '@/components/auth/UserStatusDisplay'
 
 // DashboardPage 함수는 async 함수로 정의하여 서버 컴포넌트에서 데이터 페칭 가능
 export default async function DashboardPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   // 사용자가 로그인하지 않았다면 로그인 페이지로 리다이렉트
@@ -29,6 +30,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="container mx-auto p-4">
+      < UserStatusDisplay></UserStatusDisplay>
       <h1 className="text-2xl font-bold mb-4">환영합니다, {user.email}님!</h1>
       <p className="mb-6">이곳은 당신의 대시보드입니다. 생성한 퀴즈 목록을 확인하거나 새로운 퀴즈를 만들 수 있습니다.</p>
 

@@ -3,7 +3,7 @@ import { useAuth } from '@/components/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { LogoutButton } from '@/components/auth/LogoutButton'; // 로그아웃 버튼 컴포넌트
 
-function UserStatusDisplay() {
+export function UserStatusDisplay() {
   const { user, loading } = useAuth();
 
   if (loading) {
