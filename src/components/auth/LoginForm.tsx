@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Label } from '@/components/ui/label'; // Label은 Input과 함께 사용
 
 // 폼 유효성 검사 스키마 정의
 const formSchema = z.object({
@@ -58,9 +57,10 @@ export function LoginForm() {
       // 로그인 성공 시 리다이렉트
       router.push('/text-input'); // 텍스트 입력 페이지로 이동 (MVP1 핵심 기능)
       router.refresh(); // 세션 쿠키를 다시 읽어오도록 페이지 새로고침
-    } catch (err: any) {
-      console.error('로그인 실패:', err.message);
-      setError(err.message); // 사용자에게 오류 메시지 표시
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '알 수 없는 서버 오류가 발생했습니다.';
+      console.error('로그인 실패:', errorMessage);
+      setError(errorMessage); // 사용자에게 오류 메시지 표시
     } finally {
       setLoading(false);
     }

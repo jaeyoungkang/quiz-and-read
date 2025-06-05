@@ -1,7 +1,6 @@
 'use client'; // 클라이언트 컴포넌트
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -24,7 +23,6 @@ const formSchema = z.object({
 // });
 
 export function SignupForm() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -65,9 +63,10 @@ export function SignupForm() {
       // 이메일 인증이 필요한 경우, 이메일 확인 메시지 표시 후 로그인 페이지로 리다이렉트 안내
       // 이메일 인증이 필요 없는 경우, 바로 로그인 처리 또는 로그인 페이지로 리다이렉트
       // router.push('/login'); // 예시: 회원가입 후 로그인 페이지로 이동
-    } catch (err: any) {
-      console.error('회원가입 실패:', err.message);
-      setError(err.message); // 사용자에게 오류 메시지 표시
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '알 수 없는 서버 오류가 발생했습니다.';
+      console.error('회원가입 실패:', errorMessage);
+      setError(errorMessage); // 사용자에게 오류 메시지 표시
     } finally {
       setLoading(false);
     }
